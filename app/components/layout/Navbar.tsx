@@ -1,12 +1,19 @@
+import Image from "next/image";
 import { FiSearch } from "react-icons/fi";
 
 export default function Navbar() {
   return (
     <nav className="flex items-center justify-between px-4 py-4 bg-bg-white sm:px-5">
-      {/* Avatar + Name */}
+      {/* Icon + Name */}
       <div className="flex items-center gap-2 sm:gap-3">
-        <div className="w-8 h-8 rounded-full bg-neutral-black flex items-center justify-center shrink-0">
-          <span className="text-white text-xs font-bold font-poppins">A</span>
+        <div className="w-8 h-8 rounded-full bg-neutral-black flex items-center justify-center shrink-0 overflow-hidden p-1">
+          <Image
+            src="/Icon.png"
+            alt="Alrix logo"
+            width={28}
+            height={28}
+            className="invert object-contain"
+          />
         </div>
         <span className="text-neutral-black font-semibold text-sm font-poppins tracking-tight">
           Alrix
@@ -15,7 +22,7 @@ export default function Navbar() {
 
       {/* Title + Search */}
       <div className="flex items-center gap-2 sm:gap-3">
-        <span className="text-neutral-dark text-xs sm:text-sm font-medium font-poppins hidden xs:block sm:block">
+        <span className="text-neutral-dark text-xs sm:text-sm font-medium font-poppins hidden sm:block">
           Fullstack Developer Portfolio
         </span>
         <span className="text-neutral-dark text-xs font-medium font-poppins sm:hidden">

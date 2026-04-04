@@ -17,6 +17,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  icons: {
+    
+    icon: "/Icon.png",
+  },
   title: "Alrix — Fullstack Developer",
   description:
     "Portfolio of Alif Rizqullah Maruf (Alrix) — Fullstack Developer based in Yogyakarta. Specializing in Frontend, Backend, and Smart Contract development.",

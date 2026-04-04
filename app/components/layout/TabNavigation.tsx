@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
-import { FiUser, FiFileText, FiEdit2 } from "react-icons/fi";
+import { FiFileText, FiEdit2 } from "react-icons/fi";
+
 
 export type TabId = "about" | "resume" | "work";
 
@@ -52,9 +54,9 @@ export default function TabNavigation({
 
       {/* Right icons */}
       <div className="flex items-center gap-1.5 sm:gap-2">
-        <button className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-neutral-light flex items-center justify-center hover:bg-bg-light transition-colors">
-          <FiUser size={12} className="text-neutral-dark" />
-        </button>
+        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-neutral-black flex items-center justify-center overflow-hidden p-1 shrink-0">
+          <Image src="/Icon.png" alt="Alrix" width={24} height={24} className="invert object-contain" />
+        </div>
         <button className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-neutral-light items-center justify-center hover:bg-bg-light transition-colors hidden sm:flex">
           <FiFileText size={12} className="text-neutral-dark" />
         </button>
