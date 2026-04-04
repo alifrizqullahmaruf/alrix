@@ -2,30 +2,20 @@ export default function HeroCategories() {
   const categories = ["#Frontend", "#Backend", "#Smart_Contract"];
 
   return (
-    <div className="flex flex-col justify-between h-full py-2 pr-3">
-      {/* Big dramatic diagonal arrow — fills most of the panel */}
-      <div className="flex-1 flex items-start justify-center pt-2">
+    <div className="flex flex-col gap-3 pr-3 h-full justify-end pb-2">
+      {/* Arrow — top */}
+      <div>
         <svg
-          viewBox="0 0 100 120"
+          viewBox="0 0 80 80"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full max-w-22"
+          className="w-10 h-10 sm:w-14 sm:h-14"
         >
-          {/* Thick diagonal arrow pointing bottom-right */}
-          <line
-            x1="10"
-            y1="10"
-            x2="88"
-            y2="100"
-            stroke="#111111"
-            strokeWidth="14"
-            strokeLinecap="round"
-          />
-          {/* Arrowhead */}
+          <line x1="8" y1="8" x2="68" y2="68" stroke="#111111" strokeWidth="12" strokeLinecap="round" />
           <polyline
-            points="48,100 88,100 88,58"
+            points="32,68 68,68 68,32"
             stroke="#111111"
-            strokeWidth="14"
+            strokeWidth="12"
             strokeLinecap="round"
             strokeLinejoin="round"
             fill="none"
@@ -33,13 +23,12 @@ export default function HeroCategories() {
         </svg>
       </div>
 
-      {/* Hashtag categories */}
-      <div className="flex flex-col gap-0.5 pb-2">
+      {/* Categories — below arrow */}
+      <div className="flex flex-col gap-1">
         {categories.map((cat) => (
           <span
             key={cat}
-            className="text-neutral-dark font-medium font-poppins leading-6"
-            style={{ fontSize: "clamp(9px, 1.4vw, 13px)" }}
+            className="text-neutral-dark font-semibold font-poppins leading-tight text-lg sm:text-xl lg:text-2xl"
           >
             {cat}
           </span>

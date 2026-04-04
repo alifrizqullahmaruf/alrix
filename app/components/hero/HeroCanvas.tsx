@@ -1,74 +1,162 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import gsap from "gsap";
+import Matter from "matter-js";
 
-interface Letter {
-  char: string;
-  // Final position as % of container
-  x: number;
-  y: number;
-  rotation: number;
-  size: number;
-}
-
-// Mimic the reference: letters heavily overlapping, bottom-right cluster
-// "ALRIX" top area, "FOLIO" bottom-right — very large, chaotic
-const LETTERS: Letter[] = [
-  // A — top-left, tilted
-  { char: "A", x: -2, y: -5, rotation: -15, size: 110 },
-  // L — top-center, slight tilt
-  { char: "L", x: 22, y: -8, rotation: 8, size: 100 },
-  // R — overlapping L, rotated
-  { char: "R", x: 44, y: 2, rotation: -10, size: 115 },
-  // I — thin, right area
-  { char: "I", x: 72, y: -4, rotation: 12, size: 95 },
-  // X — far right, big tilt
-  { char: "X", x: 60, y: 28, rotation: -22, size: 120 },
-  // F — middle-left
-  { char: "F", x: 2, y: 38, rotation: 14, size: 105 },
-  // O — center, heavy overlap
-  { char: "O", x: 28, y: 44, rotation: -8, size: 118 },
-  // L — right-center
-  { char: "L", x: 55, y: 50, rotation: 10, size: 100 },
-  // I — thin, tucked in
-  { char: "I", x: 75, y: 42, rotation: -18, size: 90 },
-  // O — bottom-right, biggest
-  { char: "O", x: 45, y: 62, rotation: 6, size: 122 },
-];
+const WORD = "ALRIXFOLIO";
+const YEAR = "2026";
 
 export default function HeroCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const letterRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      const els = letterRefs.current.filter(Boolean);
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
-      // Start: scattered above, invisible
-      gsap.set(els, {
-        y: () => gsap.utils.random(-400, -200),
-        x: () => gsap.utils.random(-60, 60),
-        rotation: () => gsap.utils.random(-80, 80),
-        opacity: 0,
-        scale: 0.4,
+    const W = container.clientWidth;
+    const H = container.clientHeight;
+    canvas.width = W;
+    canvas.height = H;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // ── Matter.js setup ──
+    const engine = Matter.Engine.create();
+    const world = engine.world;
+
+    // Start with zero gravity (floating phase)
+    engine.gravity.y = 0;
+    engine.gravity.x = 0;
+
+    // ── Letter sizes ──
+    const fontSize = Math.min(W * 0.13, 100);
+    ctx.font = `900 ${fontSize}px Poppins, sans-serif`;
+
+    // Measure each letter width
+    const letters = WORD.split("").map((char) => {
+      const metrics = ctx.measureText(char);
+      const w = metrics.width + 8;
+      const h = fontSize * 1.1;
+      return { char, w, h };
+    });
+
+    // ── Spawn letters floating randomly in canvas ──
+    const bodies = letters.map((letter) => {
+      const x = Matter.Common.random(letter.w, W - letter.w);
+      const y = Matter.Common.random(letter.h, H * 0.7);
+      const angle = Matter.Common.random(-0.4, 0.4);
+
+      const body = Matter.Bodies.rectangle(x, y, letter.w, letter.h, {
+        restitution: 0.4,  // bounciness
+        friction: 0.3,
+        frictionAir: 0.02,
+        angle,
+        label: letter.char,
+        render: { visible: false },
       });
 
-      // Drop in with stagger — heavy bounce like physical letters falling
-      gsap.to(els, {
-        y: 0,
-        x: 0,
-        rotation: (i) => LETTERS[i]?.rotation ?? 0,
-        opacity: 1,
-        scale: 1,
-        duration: 1.6,
-        stagger: 0.06,
-        ease: "bounce.out",
-        delay: 0.15,
+      // Random float velocity
+      Matter.Body.setVelocity(body, {
+        x: Matter.Common.random(-1.5, 1.5),
+        y: Matter.Common.random(-1.5, 1.5),
       });
-    }, containerRef);
 
-    return () => ctx.revert();
+      return body;
+    });
+
+    // ── Walls (floor + sides) ──
+    const floor  = Matter.Bodies.rectangle(W / 2, H + 25, W, 50, { isStatic: true, label: "floor" });
+    const wallL  = Matter.Bodies.rectangle(-25, H / 2, 50, H, { isStatic: true, label: "wallL" });
+    const wallR  = Matter.Bodies.rectangle(W + 25, H / 2, 50, H, { isStatic: true, label: "wallR" });
+    const ceiling = Matter.Bodies.rectangle(W / 2, -25, W, 50, { isStatic: true, label: "ceiling" });
+
+    Matter.Composite.add(world, [...bodies, floor, wallL, wallR, ceiling]);
+
+    // ── Mouse interaction ──
+    const mouse = Matter.Mouse.create(canvas);
+    const mouseConstraint = Matter.MouseConstraint.create(engine, {
+      mouse,
+      constraint: {
+        stiffness: 0.2,
+        render: { visible: false },
+      },
+    });
+    Matter.Composite.add(world, mouseConstraint);
+
+    // ── Custom render loop ──
+    let animId: number;
+    const colorMap: Record<string, string> = {};
+    bodies.forEach((b) => {
+      colorMap[b.id] = "white";
+    });
+
+    function render() {
+      if (!ctx || !canvas) return;
+      ctx.clearRect(0, 0, W, H);
+
+      // Draw each letter body
+      bodies.forEach((body) => {
+        const { x, y } = body.position;
+        const angle = body.angle;
+        const char = body.label;
+
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+
+        // Letter text
+        ctx.font = `900 ${fontSize}px Poppins, sans-serif`;
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(char, 0, 0);
+
+        ctx.restore();
+      });
+
+      // Draw year label
+      ctx.save();
+      ctx.font = `700 ${Math.max(16, W * 0.035)}px Poppins, sans-serif`;
+      ctx.fillStyle = "rgba(255,255,255,0.9)";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "bottom";
+      ctx.fillText(YEAR, 20, H - 12);
+      // Underline
+      const yw = ctx.measureText(YEAR).width;
+      ctx.fillStyle = "rgba(255,255,255,0.5)";
+      ctx.fillRect(20, H - 8, yw, 3);
+      ctx.restore();
+
+      Matter.Engine.update(engine, 1000 / 60);
+      animId = requestAnimationFrame(render);
+    }
+    render();
+
+    // ── Phase 2: Enable gravity after 1 second ──
+    const gravityTimer = setTimeout(() => {
+      // Remove ceiling so letters can fall freely from top
+      Matter.Composite.remove(world, ceiling);
+      // Enable gravity
+      engine.gravity.y = 1.8;
+      // Give each body a random horizontal nudge for spread effect
+      bodies.forEach((body) => {
+        Matter.Body.setVelocity(body, {
+          x: Matter.Common.random(-4, 4),
+          y: Matter.Common.random(-2, 1),
+        });
+      });
+    }, 1000);
+
+    // ── Cleanup ──
+    return () => {
+      clearTimeout(gravityTimer);
+      cancelAnimationFrame(animId);
+      Matter.Engine.clear(engine);
+      Matter.Composite.clear(world, false);
+    };
   }, []);
 
   return (
@@ -81,33 +169,11 @@ export default function HeroCanvas() {
         minHeight: "260px",
       }}
     >
-      {/* Letters — absolutely positioned with % coords */}
-      {LETTERS.map((letter, i) => (
-        <span
-          key={i}
-          ref={(el) => { letterRefs.current[i] = el; }}
-          className="absolute font-poppins font-extrabold text-white select-none"
-          style={{
-            left: `${letter.x}%`,
-            top: `${letter.y}%`,
-            fontSize: `${letter.size}px`,
-            lineHeight: 1,
-            transform: `rotate(${letter.rotation}deg)`,
-            transformOrigin: "center center",
-            willChange: "transform, opacity",
-          }}
-        >
-          {letter.char}
-        </span>
-      ))}
-
-      {/* 2026 label + underline — bottom-left like reference */}
-      <div className="absolute bottom-4 left-5 z-10">
-        <span className="text-white font-poppins font-bold text-xl sm:text-2xl tracking-widest opacity-90">
-          2026
-        </span>
-        <div className="w-8 h-1 bg-white mt-1 opacity-60 rounded-full" />
-      </div>
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full"
+        style={{ cursor: "grab" }}
+      />
     </div>
   );
 }

@@ -8,7 +8,7 @@ export default function HeroSection() {
       {/* Two-column layout: categories left (sm+), blue canvas right */}
       <div className="flex gap-3 items-stretch">
         {/* Left: arrow + categories — hidden on mobile, visible sm+ */}
-        <div className="hidden sm:block sm:w-[18%] lg:w-[15%] shrink-0">
+        <div className="hidden sm:flex sm:w-[30%] lg:w-[28%] shrink-0 overflow-hidden">
           <HeroCategories />
         </div>
 
