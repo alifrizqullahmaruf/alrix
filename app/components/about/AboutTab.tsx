@@ -17,15 +17,16 @@ export default function AboutTab() {
       initial="hidden"
       animate="visible"
       variants={fadeUp}
-      className="px-5 py-4"
+      className="px-4 py-4 sm:px-5"
     >
-      <div className="flex gap-4">
-        {/* Left: Profile Card */}
-        <div className="w-[38%] shrink-0">
+      {/* Stack on mobile, side-by-side on sm+ */}
+      <div className="flex flex-col gap-4 sm:flex-row">
+        {/* Profile Card — full width on mobile, 38% on sm+ */}
+        <div className="w-full sm:w-[38%] sm:shrink-0">
           <ProfileCard />
         </div>
 
-        {/* Right: Introduction + Contact */}
+        {/* Introduction + Contact — full width on mobile */}
         <div className="flex-1 flex flex-col gap-4">
           <IntroductionCard />
           <GetInTouchCards />

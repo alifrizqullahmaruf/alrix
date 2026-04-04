@@ -7,7 +7,6 @@ const CONTACTS = [
     href: "mailto:alifrizqullahmaruf2003@mail.ugm.ac.id",
     bg: "#111111",
     iconColor: "white",
-    textColor: "white/70",
   },
   {
     icon: FiLinkedin,
@@ -15,7 +14,6 @@ const CONTACTS = [
     href: "https://linkedin.com/in/alirizm/",
     bg: "#1e3cff",
     iconColor: "white",
-    textColor: "white/70",
   },
   {
     icon: FiInstagram,
@@ -23,7 +21,6 @@ const CONTACTS = [
     href: "https://instagram.com/alifrizm",
     bg: "#ffffff",
     iconColor: "#111111",
-    textColor: "#888888",
     border: true,
   },
 ];
@@ -49,36 +46,54 @@ export default function GetInTouchCards() {
         </button>
       </div>
 
-      {/* 3 Contact cards */}
+      {/*
+        Mobile:  3 columns (compact)
+        sm+:     3 columns (normal)
+        On very small screens the label text truncates gracefully
+      */}
       <div className="grid grid-cols-3 gap-2">
-        {CONTACTS.map(({ icon: Icon, label, href, bg, iconColor, textColor, border }) => (
+        {CONTACTS.map(({ icon: Icon, label, href, bg, iconColor, border }) => (
           <a
             key={href}
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-2xl p-4 flex flex-col justify-between transition-transform hover:scale-[1.02] active:scale-[0.98]"
+            className="rounded-2xl p-3 sm:p-4 flex flex-col justify-between transition-transform hover:scale-[1.02] active:scale-[0.98]"
             style={{
               background: bg,
               border: border ? "1px solid #e0e0e0" : "none",
-              minHeight: "100px",
+              minHeight: "90px",
             }}
           >
             <div
-              className="w-9 h-9 rounded-full flex items-center justify-center mb-3"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center mb-2 sm:mb-3"
               style={{
-                background: bg === "#ffffff" ? "#f5f5f5" : "rgba(255,255,255,0.15)",
+                background:
+                  bg === "#ffffff"
+                    ? "#f5f5f5"
+                    : "rgba(255,255,255,0.15)",
               }}
             >
-              <Icon size={16} color={iconColor} />
+              <Icon size={14} color={iconColor} />
             </div>
             <div
-              className="w-8 h-0.5 mb-2 rounded-full"
-              style={{ background: bg === "#ffffff" ? "#e0e0e0" : "rgba(255,255,255,0.3)" }}
+              className="w-6 sm:w-8 h-0.5 mb-1.5 sm:mb-2 rounded-full"
+              style={{
+                background:
+                  bg === "#ffffff"
+                    ? "#e0e0e0"
+                    : "rgba(255,255,255,0.3)",
+              }}
             />
             <p
-              className="text-xs font-poppins font-light leading-tight break-all"
-              style={{ color: bg === "#ffffff" ? "#888888" : "rgba(255,255,255,0.7)" }}
+              className="text-xs font-poppins font-light leading-tight break-all line-clamp-2"
+              style={{
+                color:
+                  bg === "#ffffff"
+                    ? "#888888"
+                    : "rgba(255,255,255,0.7)",
+                fontSize: "10px",
+              }}
             >
               {label}
             </p>

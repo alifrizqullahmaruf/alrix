@@ -53,9 +53,13 @@ export default function WorkTab() {
       initial="hidden"
       animate="visible"
       variants={container}
-      className="px-5 py-4"
+      className="px-4 py-4 sm:px-5"
     >
-      <div className="grid grid-cols-2 gap-4">
+      {/*
+        Mobile:  1 column
+        Tablet+: 2 columns
+      */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {PROJECTS.map((project) => (
           <motion.div key={project.name} variants={item}>
             <ProjectCard project={project} />

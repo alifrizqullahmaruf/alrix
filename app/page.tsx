@@ -14,7 +14,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<TabId>("about");
 
   return (
-    <div className="min-h-screen bg-bg-white max-w-2xl mx-auto">
+    <div className="min-h-screen bg-bg-white w-full max-w-sm mx-auto sm:max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-5xl">
       {/* Navbar */}
       <Navbar />
 

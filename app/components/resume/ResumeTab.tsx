@@ -22,9 +22,14 @@ export default function ResumeTab() {
       key="resume"
       initial="hidden"
       animate="visible"
-      className="px-5 py-4"
+      className="px-4 py-4 sm:px-5"
     >
-      <div className="grid grid-cols-3 gap-4">
+      {/*
+        Mobile:  1 column (stacked)
+        Tablet:  2 columns (experience | skills+education)
+        Desktop: 3 columns (experience | skills | education)
+      */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Column 1: Experience */}
         <motion.div variants={fadeUp} custom={0}>
           <ExperienceList />
@@ -37,8 +42,12 @@ export default function ResumeTab() {
           <SoftSkillBadges />
         </motion.div>
 
-        {/* Column 3: Education */}
-        <motion.div variants={fadeUp} custom={2}>
+        {/* Column 3: Education — on tablet merges into col 2 area */}
+        <motion.div
+          variants={fadeUp}
+          custom={2}
+          className="md:col-span-1 lg:col-span-1"
+        >
           <EducationList />
         </motion.div>
       </div>

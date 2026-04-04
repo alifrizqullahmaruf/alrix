@@ -21,19 +21,19 @@ export default function TabNavigation({
   onTabChange,
 }: TabNavigationProps) {
   return (
-    <div className="flex items-center justify-between px-5 py-3 bg-bg-white border-b border-neutral-light sticky top-0 z-10">
+    <div className="flex items-center justify-between px-4 py-3 bg-bg-white border-b border-neutral-light sticky top-0 z-10 sm:px-5">
       {/* Avatar icon */}
       <div className="w-8 h-8 rounded-full bg-neutral-black flex items-center justify-center shrink-0">
         <span className="text-white text-xs font-bold font-poppins">A</span>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-6 mx-4">
+      <div className="flex items-center gap-4 mx-2 sm:gap-6 sm:mx-4">
         {TABS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className="relative pb-1 text-sm font-medium font-poppins transition-colors"
+            className="relative pb-1 text-xs sm:text-sm font-medium font-poppins transition-colors whitespace-nowrap"
             style={{
               color: activeTab === tab.id ? "#111111" : "#888888",
             }}
@@ -51,15 +51,15 @@ export default function TabNavigation({
       </div>
 
       {/* Right icons */}
-      <div className="flex items-center gap-2">
-        <button className="w-8 h-8 rounded-full border border-neutral-light flex items-center justify-center hover:bg-bg-light transition-colors">
-          <FiUser size={13} className="text-neutral-dark" />
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        <button className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-neutral-light flex items-center justify-center hover:bg-bg-light transition-colors">
+          <FiUser size={12} className="text-neutral-dark" />
         </button>
-        <button className="w-8 h-8 rounded-full border border-neutral-light flex items-center justify-center hover:bg-bg-light transition-colors">
-          <FiFileText size={13} className="text-neutral-dark" />
+        <button className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-neutral-light items-center justify-center hover:bg-bg-light transition-colors hidden sm:flex">
+          <FiFileText size={12} className="text-neutral-dark" />
         </button>
-        <button className="w-8 h-8 rounded-full border border-neutral-light flex items-center justify-center hover:bg-bg-light transition-colors">
-          <FiEdit2 size={13} className="text-neutral-dark" />
+        <button className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-neutral-light items-center justify-center hover:bg-bg-light transition-colors hidden sm:flex">
+          <FiEdit2 size={12} className="text-neutral-dark" />
         </button>
       </div>
     </div>
