@@ -5,9 +5,9 @@ const EXPERIENCES = [
     company: "Bangkit Academy",
     role: "Machine Learning Cohort",
     bullets: [
-      "Built ML models (CNN, GAN, NLP) with TensorFlow for real-world problems.",
-      "Led CultureConnect, a mood-based café recommendation system.",
-      "Ranked Top 50 nationally and awarded Best Presenter.",
+      "Built CNN, GAN & NLP models with TensorFlow.",
+      "Led CultureConnect — mood-based café recommender.",
+      "Top 50 nationally · Best Presenter.",
     ],
     dateFrom: "Sep",
     dateTo: "Dec",
@@ -18,8 +18,8 @@ const EXPERIENCES = [
     company: "PKBI",
     role: "Mobile App Developer",
     bullets: [
-      "Developed PKBI Click, a mobile HR app with geolocation attendance & secure login.",
-      "Integrated backend APIs to manage nationwide employee data.",
+      "Built PKBI Click — mobile HR app with geolocation & secure login.",
+      "Integrated APIs for nationwide employee data.",
     ],
     dateFrom: "Jul",
     dateTo: "Dec",
@@ -30,8 +30,8 @@ const EXPERIENCES = [
     company: "Universitas Gadjah Mada",
     role: "Teaching Assistant",
     bullets: [
-      "Mentored students in web development, Python, and UI/UX design.",
-      "Supervised Agile project teams across PM, Frontend, and Backend tracks.",
+      "Mentored students in web dev, Python & UI/UX.",
+      "Supervised Agile teams — PM, Frontend, Backend.",
     ],
     dateFrom: "Jul",
     dateTo: "Jun",
@@ -42,7 +42,7 @@ const EXPERIENCES = [
     company: "UGM Stock Club",
     role: "Head of Education Division",
     bullets: [
-      "Organized workshops on stock market fundamentals and portfolio management.",
+      "Ran workshops on stock market & portfolio management.",
     ],
     dateFrom: "Aug",
     dateTo: "Jan",

@@ -1,15 +1,15 @@
 const EDUCATION = [
   {
     period: "2024",
-    institution: "DeepLearning.AI & Bangkit Academy",
-    degree: "TensorFlow Developer Certification",
+    institution: "DeepLearning.AI",
+    degree: "TensorFlow Developer Cert.",
     dark: true,
   },
   {
     period: "2022–Present",
     institution: "Universitas Gadjah Mada",
     degree: "Software Engineering Technology",
-    note: "GPA: on track",
+    note: "",
     dark: true,
   },
   {

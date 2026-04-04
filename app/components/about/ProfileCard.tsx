@@ -31,9 +31,7 @@ export default function ProfileCard() {
             My name{"\n"}is Alrix
           </h2>
           <p className="text-white/50 text-xs font-poppins font-light leading-relaxed">
-            I consider myself a detail-oriented engineer who constantly seeks
-            new skills and explores diverse tech stacks to deliver the best
-            result in every project.
+            Always learning. Always building.
           </p>
         </div>
       </div>

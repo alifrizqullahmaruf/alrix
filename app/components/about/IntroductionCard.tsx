@@ -26,13 +26,11 @@ export default function IntroductionCard() {
       >
         <div className="flex-1">
           <p className="text-neutral-black font-poppins font-semibold text-sm mb-2">
-            A Fullstack Developer based in Yogyakarta
+            Fullstack Developer · Yogyakarta
           </p>
           <p className="text-neutral-medium font-poppins text-xs leading-relaxed">
-            While studying Software Engineering at UGM, I&apos;ve always been
-            passionate about building scalable applications. I love crafting
-            solutions that are not only technically solid but also meaningful —
-            solving real problems through code and innovation.
+            Software Engineering student at UGM. Passionate about building
+            scalable apps — from web to mobile to ML.
           </p>
         </div>
 

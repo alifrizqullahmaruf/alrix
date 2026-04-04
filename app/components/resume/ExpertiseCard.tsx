@@ -1,8 +1,8 @@
 const EXPERTISE = [
-  "Fullstack Web Development",
-  "Mobile App Development (Flutter)",
-  "Machine Learning & Data Pipelines",
-  "API Design & Database Architecture",
+  "Fullstack Web Dev",
+  "Mobile (Flutter)",
+  "Machine Learning",
+  "API & Database Design",
 ];
 
 export default function ExpertiseCard() {
