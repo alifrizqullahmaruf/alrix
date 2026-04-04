@@ -5,27 +5,36 @@ import gsap from "gsap";
 
 interface Letter {
   char: string;
-  finalX: number;
-  finalY: number;
-  finalRotation: number;
-  fontSize: number;
+  // Final position as % of container
+  x: number;
+  y: number;
+  rotation: number;
+  size: number;
 }
 
-// Scattered final positions mirroring the reference design
-const ALRIX_LETTERS: Letter[] = [
-  { char: "A", finalX: 10, finalY: 8, finalRotation: -12, fontSize: 80 },
-  { char: "L", finalX: 42, finalY: 2, finalRotation: 8, fontSize: 76 },
-  { char: "R", finalX: 68, finalY: 15, finalRotation: -6, fontSize: 82 },
-  { char: "I", finalX: 85, finalY: 5, finalRotation: 15, fontSize: 70 },
-  { char: "X", finalX: 72, finalY: 38, finalRotation: -18, fontSize: 88 },
-];
-
-const FOLIO_LETTERS: Letter[] = [
-  { char: "F", finalX: 5, finalY: 45, finalRotation: 10, fontSize: 78 },
-  { char: "O", finalX: 28, finalY: 52, finalRotation: -8, fontSize: 84 },
-  { char: "L", finalX: 52, finalY: 44, finalRotation: 14, fontSize: 76 },
-  { char: "I", finalX: 70, finalY: 58, finalRotation: -20, fontSize: 72 },
-  { char: "O", finalX: 50, finalY: 65, finalRotation: 6, fontSize: 86 },
+// Mimic the reference: letters heavily overlapping, bottom-right cluster
+// "ALRIX" top area, "FOLIO" bottom-right — very large, chaotic
+const LETTERS: Letter[] = [
+  // A — top-left, tilted
+  { char: "A", x: -2, y: -5, rotation: -15, size: 110 },
+  // L — top-center, slight tilt
+  { char: "L", x: 22, y: -8, rotation: 8, size: 100 },
+  // R — overlapping L, rotated
+  { char: "R", x: 44, y: 2, rotation: -10, size: 115 },
+  // I — thin, right area
+  { char: "I", x: 72, y: -4, rotation: 12, size: 95 },
+  // X — far right, big tilt
+  { char: "X", x: 60, y: 28, rotation: -22, size: 120 },
+  // F — middle-left
+  { char: "F", x: 2, y: 38, rotation: 14, size: 105 },
+  // O — center, heavy overlap
+  { char: "O", x: 28, y: 44, rotation: -8, size: 118 },
+  // L — right-center
+  { char: "L", x: 55, y: 50, rotation: 10, size: 100 },
+  // I — thin, tucked in
+  { char: "I", x: 75, y: 42, rotation: -18, size: 90 },
+  // O — bottom-right, biggest
+  { char: "O", x: 45, y: 62, rotation: 6, size: 122 },
 ];
 
 export default function HeroCanvas() {
@@ -34,36 +43,33 @@ export default function HeroCanvas() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const allLetters = letterRefs.current.filter(Boolean);
+      const els = letterRefs.current.filter(Boolean);
 
-      // Set initial state — letters start high above
-      gsap.set(allLetters, {
-        y: -300,
-        rotation: () => Math.random() * 120 - 60,
+      // Start: scattered above, invisible
+      gsap.set(els, {
+        y: () => gsap.utils.random(-400, -200),
+        x: () => gsap.utils.random(-60, 60),
+        rotation: () => gsap.utils.random(-80, 80),
         opacity: 0,
-        scale: 0.6,
+        scale: 0.4,
       });
 
-      // Animate in with stagger + bounce
-      gsap.to(allLetters, {
+      // Drop in with stagger — heavy bounce like physical letters falling
+      gsap.to(els, {
         y: 0,
-        rotation: (i) => {
-          const all = [...ALRIX_LETTERS, ...FOLIO_LETTERS];
-          return all[i]?.finalRotation ?? 0;
-        },
+        x: 0,
+        rotation: (i) => LETTERS[i]?.rotation ?? 0,
         opacity: 1,
         scale: 1,
-        duration: 1.4,
-        stagger: 0.07,
+        duration: 1.6,
+        stagger: 0.06,
         ease: "bounce.out",
-        delay: 0.2,
+        delay: 0.15,
       });
     }, containerRef);
 
     return () => ctx.revert();
   }, []);
-
-  const allLetters = [...ALRIX_LETTERS, ...FOLIO_LETTERS];
 
   return (
     <div
@@ -72,34 +78,35 @@ export default function HeroCanvas() {
       style={{
         backgroundColor: "#1e3cff",
         aspectRatio: "4/3",
-        minHeight: "280px",
+        minHeight: "260px",
       }}
     >
-      {/* Scattered letters */}
-      {allLetters.map((letter, i) => (
+      {/* Letters — absolutely positioned with % coords */}
+      {LETTERS.map((letter, i) => (
         <span
-          key={`${letter.char}-${i}`}
-          ref={(el) => {
-            letterRefs.current[i] = el;
-          }}
-          className="absolute font-poppins font-extrabold text-white select-none leading-none"
+          key={i}
+          ref={(el) => { letterRefs.current[i] = el; }}
+          className="absolute font-poppins font-extrabold text-white select-none"
           style={{
-            left: `${letter.finalX}%`,
-            top: `${letter.finalY}%`,
-            fontSize: `${letter.fontSize}px`,
+            left: `${letter.x}%`,
+            top: `${letter.y}%`,
+            fontSize: `${letter.size}px`,
             lineHeight: 1,
+            transform: `rotate(${letter.rotation}deg)`,
+            transformOrigin: "center center",
+            willChange: "transform, opacity",
           }}
         >
           {letter.char}
         </span>
       ))}
 
-      {/* Year label */}
-      <div className="absolute bottom-4 left-5">
-        <span className="text-white font-poppins font-bold text-2xl tracking-widest opacity-90">
+      {/* 2026 label + underline — bottom-left like reference */}
+      <div className="absolute bottom-4 left-5 z-10">
+        <span className="text-white font-poppins font-bold text-xl sm:text-2xl tracking-widest opacity-90">
           2026
         </span>
-        <div className="w-8 h-1 bg-white mt-1 opacity-70 rounded-full" />
+        <div className="w-8 h-1 bg-white mt-1 opacity-60 rounded-full" />
       </div>
     </div>
   );
