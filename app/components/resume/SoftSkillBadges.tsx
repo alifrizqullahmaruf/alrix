@@ -17,16 +17,9 @@ const COLORS = [
 export default function SoftSkillBadges() {
   return (
     <div className="mb-4">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-neutral-black font-poppins font-bold text-base">
-          Softskill
-        </h3>
-        <button className="w-7 h-7 rounded-full border border-neutral-light flex items-center justify-center">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M2 4L6 8L10 4" stroke="#888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-      </div>
+      <h3 className="text-neutral-black font-poppins font-bold text-base mb-3">
+        Softskill
+      </h3>
       <div className="flex flex-wrap gap-2">
         {SOFTSKILLS.map((skill, i) => (
           <span

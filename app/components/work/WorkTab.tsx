@@ -1,40 +1,15 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion, type Variants } from "framer-motion";
-import ProjectCard from "./ProjectCard";
-
-const PROJECTS = [
-  {
-    name: "CultureConnect",
-    description: "Mood-based café recommender using NLP. Top 50 Bangkit 2024.",
-    stack: ["TensorFlow", "Python", "NLP", "Scikit-learn"],
-    color: "#1e3cff",
-  },
-  {
-    name: "PKBI Click",
-    description: "Mobile HR app — geolocation attendance & secure login.",
-    stack: ["Flutter", "Node.js", "PostgreSQL"],
-    color: "#111111",
-  },
-  {
-    name: "Portfolio Website",
-    description: "Built with Next.js 16, Tailwind v4, GSAP & Framer Motion.",
-    stack: ["Next.js", "TypeScript", "GSAP", "Tailwind"],
-    color: "#333333",
-  },
-  {
-    name: "Coming Soon",
-    description: "More coming soon. Let's collaborate.",
-    stack: [],
-    color: "#888888",
-  },
-];
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import ProjectCard, { type Project } from "./ProjectCard";
+import ProjectDetailModal from "./ProjectDetailModal";
 
 const container: Variants = {
   hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.1 },
-  },
+  visible: { transition: { staggerChildren: 0.1 } },
 };
 
 const item: Variants = {
@@ -43,25 +18,67 @@ const item: Variants = {
 };
 
 export default function WorkTab() {
-  return (
-    <motion.div
-      key="work"
-      initial="hidden"
-      animate="visible"
-      variants={container}
-      className="px-4 py-4 sm:px-5"
-    >
-      {/*
-        Mobile:  1 column
-        Tablet+: 2 columns
-      */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {PROJECTS.map((project) => (
-          <motion.div key={project.name} variants={item}>
-            <ProjectCard project={project} />
-          </motion.div>
-        ))}
+  const [projects, setProjects] = useState<(Project & { id: string; order: number })[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState<(Project & { id: string }) | null>(null);
+
+  useEffect(() => {
+    async function fetchProjects() {
+      try {
+        const q = query(collection(db, "projects"), orderBy("order", "asc"));
+        const snap = await getDocs(q);
+        const data = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Project & { order: number }, "id">) }));
+        setProjects(data);
+      } catch {
+        // Firestore empty or offline
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProjects();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="px-4 py-12 text-center">
+        <p className="text-neutral-medium font-poppins text-sm">Loading projects...</p>
       </div>
-    </motion.div>
+    );
+  }
+
+  if (projects.length === 0) {
+    return (
+      <div className="px-4 py-12 text-center">
+        <p className="text-neutral-medium font-poppins text-sm">No projects yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <motion.div
+        key="work"
+        initial="hidden"
+        animate="visible"
+        variants={container}
+        className="px-4 py-4 sm:px-5"
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          {projects.map((project) => (
+            <motion.div key={project.id} variants={item}>
+              <ProjectCard
+                project={project}
+                onClick={() => setSelected(project)}
+              />
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+
+      <ProjectDetailModal
+        project={selected}
+        onClose={() => setSelected(null)}
+      />
+    </>
   );
 }

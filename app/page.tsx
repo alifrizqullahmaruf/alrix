@@ -22,7 +22,9 @@ export default function Home() {
       <HeroSection />
 
       {/* Tab Navigation */}
-      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <div id="main-content">
+        <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
 
       {/* Tab Content */}
       <AnimatePresence mode="wait">

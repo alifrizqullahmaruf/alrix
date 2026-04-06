@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
-import { FiFileText, FiEdit2 } from "react-icons/fi";
+import { FiFileText } from "react-icons/fi";
 
+const CV_PATH = "/CV Alif Rizqullah Maruf - Software Engineer.pdf";
 
 export type TabId = "about" | "resume" | "work";
 
@@ -24,10 +24,6 @@ export default function TabNavigation({
 }: TabNavigationProps) {
   return (
     <div className="flex items-center justify-between px-4 py-3 bg-bg-white border-b border-neutral-light sticky top-0 z-10 sm:px-5">
-      {/* Avatar icon */}
-      <div className="w-8 h-8 rounded-full bg-neutral-black flex items-center justify-center shrink-0">
-        <span className="text-white text-xs font-bold font-poppins">A</span>
-      </div>
 
       {/* Tabs */}
       <div className="flex items-center gap-4 mx-2 sm:gap-6 sm:mx-4">
@@ -54,15 +50,15 @@ export default function TabNavigation({
 
       {/* Right icons */}
       <div className="flex items-center gap-1.5 sm:gap-2">
-        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-neutral-black flex items-center justify-center overflow-hidden p-1 shrink-0">
-          <Image src="/Icon.png" alt="Alrix" width={24} height={24} className="invert object-contain" />
-        </div>
-        <button className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-neutral-light items-center justify-center hover:bg-bg-light transition-colors hidden sm:flex">
+        <a
+          href={CV_PATH}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-neutral-light items-center justify-center hover:bg-bg-light transition-colors hidden sm:flex"
+          title="View & download CV"
+        >
           <FiFileText size={12} className="text-neutral-dark" />
-        </button>
-        <button className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-neutral-light items-center justify-center hover:bg-bg-light transition-colors hidden sm:flex">
-          <FiEdit2 size={12} className="text-neutral-dark" />
-        </button>
+        </a>
       </div>
     </div>
   );

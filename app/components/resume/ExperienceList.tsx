@@ -52,16 +52,9 @@ const EXPERIENCES = [
 export default function ExperienceList() {
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-neutral-black font-poppins font-bold text-lg">
-          Experience
-        </h3>
-        <button className="w-7 h-7 rounded-full border border-neutral-light flex items-center justify-center">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-            <path d="M2 4L6 8L10 4" stroke="#888" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
-      </div>
+      <h3 className="text-neutral-black font-poppins font-bold text-lg mb-4">
+        Experience
+      </h3>
 
       <div className="flex flex-col gap-4">
         {EXPERIENCES.map((exp, i) => (
@@ -69,18 +62,13 @@ export default function ExperienceList() {
             key={i}
             className="rounded-2xl p-4 bg-bg-card border border-neutral-light hover:shadow-sm transition-shadow"
           >
-            {/* Badge + icon */}
-            <div className="flex items-start justify-between mb-2">
-              <span
-                className="text-xs font-poppins font-semibold text-white px-3 py-1 rounded-full"
-                style={{ background: "#1e3cff" }}
-              >
-                {exp.badge}
-              </span>
-              <div className="w-6 h-6 rounded-full border border-neutral-light flex items-center justify-center">
-                <div className="w-2 h-2 rounded-full bg-neutral-light" />
-              </div>
-            </div>
+            {/* Badge */}
+            <span
+              className="text-xs font-poppins font-semibold text-white px-3 py-1 rounded-full inline-block mb-2"
+              style={{ background: "#1e3cff" }}
+            >
+              {exp.badge}
+            </span>
 
             {/* Company + role */}
             <p className="text-neutral-medium text-xs font-poppins mb-0.5">
