@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { FiFileText } from "react-icons/fi";
+import { FiFileText, FiMail } from "react-icons/fi";
 
 const CV_PATH = "/CV Alif Rizqullah Maruf - Software Engineer.pdf";
 
@@ -54,10 +54,17 @@ export default function TabNavigation({
           href={CV_PATH}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-neutral-light items-center justify-center hover:bg-bg-light transition-colors hidden sm:flex"
+          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-neutral-light flex items-center justify-center hover:bg-bg-light transition-colors"
           title="View & download CV"
         >
           <FiFileText size={12} className="text-neutral-dark" />
+        </a>
+        <a
+          href="mailto:alifmaruf5923@gmail.com"
+          className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-neutral-light flex items-center justify-center hover:bg-bg-light transition-colors"
+          title="Send email"
+        >
+          <FiMail size={12} className="text-neutral-dark" />
         </a>
       </div>
     </div>

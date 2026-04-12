@@ -1,5 +1,18 @@
 const EXPERIENCES = [
   {
+    period: "2025–Present",
+    badge: "Sep 2025–Present",
+    company: "Dolfin · AdvisorLauren",
+    role: "Frontend Engineer — Internship",
+    bullets: [
+      "Integrated AdvisorLauren's AI-powered equity research into Woori Bank's MyData platform.",
+      "Built in-app WebView delivering real-time stock insights, financial charts & sentiment analysis.",
+      "Architected with Next.js App Router, ISR, lazy loading & reusable Tailwind components.",
+    ],
+    dateFrom: "Sep",
+    dateTo: "Present",
+  },
+  {
     period: "2024",
     badge: "Sep–Dec 2024",
     company: "Bangkit Academy",
@@ -35,17 +48,6 @@ const EXPERIENCES = [
     ],
     dateFrom: "Jul",
     dateTo: "Jun",
-  },
-  {
-    period: "2022–2023",
-    badge: "Aug 2022–Jan 2023",
-    company: "UGM Stock Club",
-    role: "Head of Education Division",
-    bullets: [
-      "Ran workshops on stock market & portfolio management.",
-    ],
-    dateFrom: "Aug",
-    dateTo: "Jan",
   },
 ];
 

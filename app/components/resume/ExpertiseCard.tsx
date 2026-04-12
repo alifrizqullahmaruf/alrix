@@ -1,6 +1,6 @@
 const EXPERTISE = [
-  "Fullstack Web Dev",
-  "Mobile (Flutter)",
+  "Fullstack Web Development",
+  "Smart Contract Developer",
   "Machine Learning",
   "API & Database Design",
 ];

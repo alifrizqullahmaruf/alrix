@@ -1,11 +1,12 @@
 import Image from "next/image";
+import Link from "next/link";
 import { FiSearch } from "react-icons/fi";
 
 export default function Navbar() {
   return (
     <nav className="flex items-center justify-between px-4 py-4 bg-bg-white sm:px-5">
-      {/* Icon + Name */}
-      <div className="flex items-center gap-2 sm:gap-3">
+      {/* Icon + Name → admin */}
+      <Link href="/admin" className="flex items-center gap-2 sm:gap-3 hover:opacity-70 transition-opacity">
         <div className="w-8 h-8 rounded-full bg-neutral-black flex items-center justify-center shrink-0 overflow-hidden p-1">
           <Image
             src="/Icon.png"
@@ -18,7 +19,7 @@ export default function Navbar() {
         <span className="text-neutral-black font-semibold text-sm font-poppins tracking-tight">
           Alrix
         </span>
-      </div>
+      </Link>
 
       {/* Title + Search */}
       <div className="flex items-center gap-2 sm:gap-3">

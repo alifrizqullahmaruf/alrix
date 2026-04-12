@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Matter from "matter-js";
 
 function getSizes(W: number) {
@@ -72,9 +72,16 @@ function drawGeo(
   ctx.restore();
 }
 
+interface EngineRef {
+  cleanup?: () => void;
+  requestOrientation?: () => void;
+}
+
 export default function HeroCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const engineRef = useRef<EngineRef>({});
+  const [showTiltBtn, setShowTiltBtn] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -272,45 +279,47 @@ export default function HeroCanvas() {
       });
     }, 1500);
 
-    // ── Device orientation: tilt to change gravity direction ──
-    let orientationActive = false;
-
+    // ── Device orientation: tilt to change gravity ──
     function handleOrientation(e: DeviceOrientationEvent) {
-      if (!orientationActive) return;
-      const gamma = e.gamma ?? 0; // left/right tilt: -90 to 90
-      const beta  = e.beta  ?? 0; // front/back tilt: -180 to 180
-
-      // Clamp and normalize to -1..1
+      const gamma = e.gamma ?? 0;
+      const beta  = e.beta  ?? 0;
       engine.gravity.x = Math.max(-1, Math.min(1, gamma / 45));
       engine.gravity.y = Math.max(-1, Math.min(1, beta  / 45));
     }
 
-    // Enable orientation after initial gravity drop (give time to settle)
-    const tOrientation = setTimeout(() => {
-      orientationActive = true;
+    const isIOS =
+      typeof DeviceOrientationEvent !== "undefined" &&
+      typeof (DeviceOrientationEvent as unknown as { requestPermission?: unknown }).requestPermission === "function";
 
-      // iOS 13+ requires permission
-      if (
-        typeof DeviceOrientationEvent !== "undefined" &&
-        typeof (DeviceOrientationEvent as unknown as { requestPermission?: () => Promise<string> }).requestPermission === "function"
-      ) {
-        (DeviceOrientationEvent as unknown as { requestPermission: () => Promise<string> })
-          .requestPermission()
-          .then((state) => {
-            if (state === "granted") {
-              window.addEventListener("deviceorientation", handleOrientation);
-            }
-          })
-          .catch(() => {/* permission denied, silently skip */});
-      } else {
+    if (!isIOS) {
+      // Android / non-iOS: register immediately after gravity drop
+      const tOrientation = setTimeout(() => {
         window.addEventListener("deviceorientation", handleOrientation);
-      }
-    }, 3000);
+      }, 2000);
+      engineRef.current = { cleanup: () => clearTimeout(tOrientation) };
+    } else {
+      // iOS: expose handler so the button can trigger permission
+      engineRef.current = {
+        requestOrientation: () => {
+          (DeviceOrientationEvent as unknown as { requestPermission: () => Promise<string> })
+            .requestPermission()
+            .then((state) => {
+              if (state === "granted") {
+                window.addEventListener("deviceorientation", handleOrientation);
+              }
+            })
+            .catch(() => {/* silently skip */});
+        },
+      };
+      // Show the button after objects have settled
+      const tBtn = setTimeout(() => setShowTiltBtn(true), 2000);
+      engineRef.current.cleanup = () => clearTimeout(tBtn);
+    }
 
     return () => {
       cancelAnimationFrame(animId);
       clearTimeout(tGravity);
-      clearTimeout(tOrientation);
+      engineRef.current?.cleanup?.();
       window.removeEventListener("deviceorientation", handleOrientation);
       Matter.Engine.clear(engine);
       Matter.Composite.clear(world, false);
@@ -328,6 +337,15 @@ export default function HeroCanvas() {
         className="absolute inset-0 w-full h-full"
         style={{ cursor: "grab" }}
       />
+      {showTiltBtn && (
+        <button
+          onClick={() => engineRef.current?.requestOrientation?.()}
+          className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-poppins font-semibold"
+          style={{ background: "rgba(255,255,255,0.2)", color: "white", backdropFilter: "blur(6px)" }}
+        >
+          🌀 Enable Tilt
+        </button>
+      )}
     </div>
   );
 }
