@@ -3,21 +3,89 @@
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiX, FiGithub, FiExternalLink } from "react-icons/fi";
+import ReactMarkdown, { type Components } from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface CropData {
   x: number; y: number; width: number; height: number;
 }
 
+type ProjectStatus = "live" | "in-progress" | "archived";
+
 interface Project {
   id: string;
   name: string;
   description: string;
+  details?: string;
+  role?: string;
+  year?: number;
+  status?: ProjectStatus;
   stack: string[];
   imageUrl?: string;
-  imageCrop?: CropData;
+  imageCrop?: CropData | null;
   github?: string;
   demo?: string;
 }
+
+const STATUS_LABEL: Record<ProjectStatus, string> = {
+  "live": "Live",
+  "in-progress": "In Progress",
+  "archived": "Archived",
+};
+
+const STATUS_COLOR: Record<ProjectStatus, { bg: string; fg: string }> = {
+  "live":        { bg: "#dcfce7", fg: "#15803d" },
+  "in-progress": { bg: "#fef3c7", fg: "#a16207" },
+  "archived":    { bg: "#f3f4f6", fg: "#52525b" },
+};
+
+function MetaRow({ project }: { project: Project }) {
+  const items: string[] = [];
+  if (project.year) items.push(String(project.year));
+  if (project.role) items.push(project.role);
+
+  if (!project.status && items.length === 0) return null;
+
+  return (
+    <div className="flex items-center gap-2 mb-3 flex-wrap">
+      {project.status && (
+        <span
+          className="px-2 py-0.5 rounded-full text-xs font-poppins font-semibold"
+          style={{ background: STATUS_COLOR[project.status].bg, color: STATUS_COLOR[project.status].fg }}
+        >
+          {STATUS_LABEL[project.status]}
+        </span>
+      )}
+      {items.length > 0 && (
+        <span className="text-neutral-medium font-poppins text-xs">
+          {items.join(" · ")}
+        </span>
+      )}
+    </div>
+  );
+}
+
+// Bold-Minimalism markdown styling
+const md: Components = {
+  h1: ({ children }) => <h3 className="text-base font-bold text-neutral-black mt-4 mb-2">{children}</h3>,
+  h2: ({ children }) => <h4 className="text-sm font-bold text-neutral-black mt-4 mb-1.5">{children}</h4>,
+  h3: ({ children }) => <h5 className="text-sm font-semibold text-neutral-dark mt-3 mb-1">{children}</h5>,
+  p: ({ children }) => <p className="text-sm text-neutral-dark mb-3 leading-relaxed">{children}</p>,
+  ul: ({ children }) => <ul className="list-disc pl-5 text-sm text-neutral-dark mb-3 space-y-1 leading-relaxed">{children}</ul>,
+  ol: ({ children }) => <ol className="list-decimal pl-5 text-sm text-neutral-dark mb-3 space-y-1 leading-relaxed">{children}</ol>,
+  li: ({ children }) => <li className="marker:text-neutral-medium">{children}</li>,
+  strong: ({ children }) => <strong className="font-semibold text-neutral-black">{children}</strong>,
+  em: ({ children }) => <em className="italic">{children}</em>,
+  a: ({ href, children }) => (
+    <a href={href} target="_blank" rel="noopener noreferrer" className="font-medium underline decoration-1 underline-offset-2" style={{ color: "#1e3cff" }}>
+      {children}
+    </a>
+  ),
+  code: ({ children }) => <code className="px-1.5 py-0.5 bg-bg-light rounded text-xs font-mono text-neutral-black">{children}</code>,
+  pre: ({ children }) => <pre className="p-3 bg-bg-light rounded-lg overflow-x-auto text-xs font-mono mb-3 leading-relaxed">{children}</pre>,
+  blockquote: ({ children }) => <blockquote className="border-l-2 border-neutral-light pl-3 my-3 text-neutral-medium italic text-sm">{children}</blockquote>,
+  hr: () => <hr className="my-4 border-neutral-light" />,
+};
 
 interface Props {
   project: Project | null;
@@ -38,7 +106,7 @@ export default function ProjectDetailModal({ project, onClose }: Props) {
     return () => { document.body.style.overflow = ""; };
   }, [project]);
 
-  const imgStyle = (crop?: CropData): React.CSSProperties =>
+  const imgStyle = (crop?: CropData | null): React.CSSProperties =>
     crop
       ? {
           position: "absolute",
@@ -104,9 +172,17 @@ export default function ProjectDetailModal({ project, onClose }: Props) {
               <h2 className="text-neutral-black font-poppins font-bold text-base mb-2">
                 {project.name}
               </h2>
-              <p className="text-neutral-medium font-poppins text-sm leading-relaxed mb-4">
+              <MetaRow project={project} />
+              <p className="text-neutral-medium font-poppins text-sm leading-relaxed mb-3">
                 {project.description}
               </p>
+              {project.details && (
+                <div className="font-poppins mb-4">
+                  <ReactMarkdown components={md} remarkPlugins={[remarkGfm]}>
+                    {project.details}
+                  </ReactMarkdown>
+                </div>
+              )}
 
               <div className="mb-5">
                 <p className="text-neutral-dark font-poppins font-semibold text-xs mb-2 uppercase tracking-wide">
@@ -188,9 +264,17 @@ export default function ProjectDetailModal({ project, onClose }: Props) {
               <h2 className="text-neutral-black font-poppins font-bold text-lg mb-2">
                 {project.name}
               </h2>
-              <p className="text-neutral-medium font-poppins text-sm leading-relaxed mb-4">
+              <MetaRow project={project} />
+              <p className="text-neutral-medium font-poppins text-sm leading-relaxed mb-3">
                 {project.description}
               </p>
+              {project.details && (
+                <div className="font-poppins mb-4">
+                  <ReactMarkdown components={md} remarkPlugins={[remarkGfm]}>
+                    {project.details}
+                  </ReactMarkdown>
+                </div>
+              )}
 
               <div className="mb-5">
                 <p className="text-neutral-dark font-poppins font-semibold text-xs mb-2 uppercase tracking-wide">

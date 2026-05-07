@@ -5,13 +5,19 @@ interface CropData {
   height: number;
 }
 
+export type ProjectStatus = "live" | "in-progress" | "archived";
+
 export interface Project {
   id?: string;
   name: string;
   description: string;
+  details?: string;
+  role?: string;
+  year?: number;
+  status?: ProjectStatus;
   stack: string[];
   imageUrl?: string;
-  imageCrop?: CropData;
+  imageCrop?: CropData | null;
   github?: string;
   demo?: string;
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins, Inter } from "next/font/google";
+import { Poppins, Inter, Archivo_Black } from "next/font/google";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -16,10 +16,17 @@ const inter = Inter({
   display: "swap",
 });
 
+const archivoBlack = Archivo_Black({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-archivo-black-var",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   icons: {
     
-    icon: "/Icon.png",
+    icon: "/cropped_circle_image_alrix.png",
   },
   title: "Alrix — Fullstack Developer",
   description:
@@ -34,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${poppins.variable} ${inter.variable}`}
+      className={`${poppins.variable} ${inter.variable} ${archivoBlack.variable}`}
     >
       <body className="min-h-screen bg-bg-white font-poppins">
         {children}

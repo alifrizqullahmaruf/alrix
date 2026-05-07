@@ -29,8 +29,8 @@ export default function WorkTab() {
         const snap = await getDocs(q);
         const data = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Project & { order: number }, "id">) }));
         setProjects(data);
-      } catch {
-        // Firestore empty or offline
+      } catch (err) {
+        console.error("Failed to fetch projects from Firestore:", err);
       } finally {
         setLoading(false);
       }

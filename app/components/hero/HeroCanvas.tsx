@@ -82,8 +82,19 @@ export default function HeroCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<EngineRef>({});
   const [showTiltBtn, setShowTiltBtn] = useState(false);
+  const [fontReady, setFontReady] = useState(false);
+
+  // Wait for Archivo Black to be loaded before measuring/drawing on canvas
+  useEffect(() => {
+    let cancelled = false;
+    document.fonts.ready.then(() => {
+      if (!cancelled) setFontReady(true);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
+    if (!fontReady) return;
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
@@ -101,6 +112,12 @@ export default function HeroCanvas() {
     const { letterSize, iconSize, gap } = getSizes(W);
     const c = ctx; // non-null alias for use inside nested functions
 
+    // ── Resolve actual font family from CSS variable (next/font obfuscates names) ──
+    const cssFont = getComputedStyle(document.documentElement)
+      .getPropertyValue("--font-archivo-black-var")
+      .trim();
+    const HEADLINE_FONT = `${cssFont || '"Archivo Black"'}, "Archivo Black", Impact, sans-serif`;
+
     // ── Matter.js world — gravity starts at 0 (static display phase) ──
     const engine = Matter.Engine.create();
     engine.gravity.x = 0;
@@ -109,7 +126,7 @@ export default function HeroCanvas() {
 
     // ── Layout helper: centers a row of chars at given y ──
     function layoutRow(chars: string[], cy: number) {
-      c.font = `900 ${letterSize}px Poppins, sans-serif`;
+      c.font = `400 ${letterSize}px ${HEADLINE_FONT}`;
       const charWidths = chars.map((ch) => c.measureText(ch).width);
       const bodyWidths = charWidths.map((w) => Math.max(w + 6, letterSize * 0.5));
       const totalW = bodyWidths.reduce((a, b) => a + b, 0) + gap * (chars.length - 1);
@@ -226,10 +243,10 @@ export default function HeroCanvas() {
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(body.angle);
-        ctx.font = `900 ${letterSize}px Poppins, sans-serif`;
+        ctx.font = `400 ${letterSize}px ${HEADLINE_FONT}`;
         ctx.fillStyle = "white";
-        ctx.shadowColor = "rgba(255,255,255,0.45)";
-        ctx.shadowBlur = 14;
+        ctx.shadowColor = "rgba(255,255,255,0.25)";
+        ctx.shadowBlur = 8;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText(letterMeta[i].char, 0, 0);
@@ -324,7 +341,7 @@ export default function HeroCanvas() {
       Matter.Engine.clear(engine);
       Matter.Composite.clear(world, false);
     };
-  }, []);
+  }, [fontReady]);
 
   return (
     <div

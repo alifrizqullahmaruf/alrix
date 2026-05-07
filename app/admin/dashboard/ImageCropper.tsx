@@ -13,7 +13,7 @@ export interface CropData {
 
 interface Props {
   imageUrl: string;
-  initialCrop?: CropData;
+  initialCrop?: CropData | null;
   onConfirm: (crop: CropData) => void;
   onCancel: () => void;
 }

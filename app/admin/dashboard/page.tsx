@@ -5,38 +5,25 @@ import { useRouter } from "next/navigation";
 import {
   collection,
   getDocs,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
   orderBy,
   query,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import ImageCropper, { type CropData } from "./ImageCropper";
 
-// Convert known sharing URLs to direct embeddable image URLs
-function normalizeImageUrl(url: string): string {
-  // Imgur single image page: imgur.com/AbCdEfG → i.imgur.com/AbCdEfG.jpg
-  const imgurPage = url.match(/^https?:\/\/imgur\.com\/([a-zA-Z0-9]+)$/);
-  if (imgurPage) return `https://i.imgur.com/${imgurPage[1]}.jpg`;
-  return url;
-}
-
-// Return a hint if the URL is a known unsupported sharing format
-function getUrlHint(url: string): string | null {
-  if (/drive\.google\.com/.test(url)) return "Google Drive tidak bisa di-embed. Gunakan Imgur — upload gambar lalu copy \"Copy image address\".";
-  if (/imgur\.com\/a\//.test(url) || /imgur\.com\/gallery\//.test(url)) return "Ini adalah link album Imgur. Buka albumnya, klik gambarnya, lalu klik kanan → \"Copy image address\" untuk mendapat link langsung (contoh: i.imgur.com/xxx.jpg).";
-  return null;
-}
+type ProjectStatus = "live" | "in-progress" | "archived";
 
 interface Project {
   id: string;
   name: string;
   description: string;
+  details?: string;
+  role?: string;
+  year?: number;
+  status?: ProjectStatus;
   stack: string[];
   imageUrl: string;
-  imageCrop?: CropData;
+  imageCrop?: CropData | null;
   github: string;
   demo: string;
   order: number;
@@ -45,6 +32,10 @@ interface Project {
 const EMPTY: Omit<Project, "id"> = {
   name: "",
   description: "",
+  details: "",
+  role: "",
+  year: new Date().getFullYear(),
+  status: "live",
   stack: [],
   imageUrl: "",
   github: "",
@@ -64,6 +55,7 @@ export default function AdminDashboard() {
   const [showCropper, setShowCropper] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   async function fetchProjects() {
     const q = query(collection(db, "projects"), orderBy("order", "asc"));
@@ -105,20 +97,56 @@ export default function AdminDashboard() {
     setEditingId(null);
   }
 
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setImageLoaded(false);
+    setImageError(false);
+
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await fetch("/api/upload", { method: "POST", body: fd });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert(`Upload gagal: ${err.error || res.statusText}`);
+      setUploading(false);
+      return;
+    }
+    const { url } = await res.json();
+    // Use null (not undefined) so server clears the old crop data on update
+    setForm((f) => ({ ...f, imageUrl: url, imageCrop: null }));
+    setUploading(false);
+  }
+
   async function handleSave() {
     setSaving(true);
     const raw = {
       ...form,
-      imageUrl: normalizeImageUrl(form.imageUrl),
       stack: stackInput.split(",").map((s) => s.trim()).filter(Boolean),
     };
-    // Firestore rejects undefined — strip all undefined fields
+    // Drop undefined but preserve null (null = explicitly clear field on server)
     const data = Object.fromEntries(Object.entries(raw).filter(([, v]) => v !== undefined));
-    if (editingId) {
-      await updateDoc(doc(db, "projects", editingId), data);
-    } else {
-      await addDoc(collection(db, "projects"), { ...data, createdAt: Date.now() });
+
+    const res = editingId
+      ? await fetch(`/api/projects/${editingId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        })
+      : await fetch("/api/projects", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert(`Gagal menyimpan: ${err.error || res.statusText}`);
+      setSaving(false);
+      return;
     }
+
     await fetchProjects();
     setShowForm(false);
     setEditingId(null);
@@ -127,7 +155,12 @@ export default function AdminDashboard() {
 
   async function handleDelete(id: string) {
     if (!confirm("Hapus project ini?")) return;
-    await deleteDoc(doc(db, "projects", id));
+    const res = await fetch(`/api/projects/${id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert(`Gagal menghapus: ${err.error || res.statusText}`);
+      return;
+    }
     await fetchProjects();
   }
 
@@ -137,7 +170,7 @@ export default function AdminDashboard() {
   }
 
   const crop = form.imageCrop;
-  const resolvedImageUrl = form.imageUrl ? normalizeImageUrl(form.imageUrl) : "";
+  const resolvedImageUrl = form.imageUrl;
 
   return (
     <div className="min-h-screen bg-bg-white">
@@ -200,13 +233,58 @@ export default function AdminDashboard() {
                 />
               </Field>
 
-              <Field label="Description" className="sm:col-span-2">
+              <Field label="Year">
+                <input
+                  type="number"
+                  min={2000}
+                  max={2100}
+                  value={form.year ?? ""}
+                  onChange={(e) => setForm({ ...form, year: e.target.value ? Number(e.target.value) : undefined })}
+                  placeholder="2024"
+                  className={inputClass}
+                />
+              </Field>
+
+              <Field label="Status">
+                <select
+                  value={form.status ?? "live"}
+                  onChange={(e) => setForm({ ...form, status: e.target.value as ProjectStatus })}
+                  className={inputClass}
+                >
+                  <option value="live">Live</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </Field>
+
+              <Field label="Role" className="sm:col-span-2">
+                <input
+                  value={form.role ?? ""}
+                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+                  placeholder="Solo Developer / Frontend Lead / Smart Contract Dev"
+                  className={inputClass}
+                />
+              </Field>
+
+              <Field label="Short Description (for card preview)" className="sm:col-span-2">
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  placeholder="Short description of the project"
+                  placeholder="One-liner — keep it under 150 characters"
                   rows={2}
+                  maxLength={200}
                   className={inputClass + " resize-none"}
+                />
+              </Field>
+
+              <Field label="Full Details (for modal) format markdown
+              " className="sm:col-span-2">
+                <textarea 
+                  value={form.details ?? ""}
+                  onChange={(e) => setForm({ ...form, details: e.target.value })}
+                  placeholder="Long description — what was built, why, key challenges, outcomes. Newlines preserved."
+                  rows={6}
+                  className={inputClass + " resize-y"}
                 />
               </Field>
 
@@ -237,22 +315,34 @@ export default function AdminDashboard() {
                 />
               </Field>
 
-              <Field label="Image URL" className="sm:col-span-2">
-                <input
-                  value={form.imageUrl}
-                  onChange={(e) => {
-                    setForm({ ...form, imageUrl: e.target.value, imageCrop: undefined });
-                    setImageLoaded(false);
-                    setImageError(false);
-                  }}
-                  placeholder="https://i.imgur.com/..."
-                  className={inputClass}
-                />
-                {form.imageUrl && getUrlHint(form.imageUrl) && (
-                  <p className="text-amber-500 font-poppins text-xs mt-1.5">
-                    {getUrlHint(form.imageUrl)}
-                  </p>
-                )}
+              <Field label="Project Image" className="sm:col-span-2">
+                <div className="flex items-center gap-3">
+                  <label className="px-4 py-2 rounded-xl bg-neutral-black text-white font-poppins font-semibold text-xs cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-50">
+                    {uploading ? "Uploading..." : form.imageUrl ? "Replace Image" : "Upload Image"}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      onChange={handleFileUpload}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                  </label>
+                  {form.imageUrl && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setForm({ ...form, imageUrl: "", imageCrop: null });
+                        setImageLoaded(false);
+                      }}
+                      className="text-xs font-poppins text-neutral-medium hover:text-red-500 transition-colors"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+                <p className="text-neutral-medium font-poppins text-xs mt-1.5">
+                  Max 5 MB. Format: JPG, PNG, WebP, GIF.
+                </p>
               </Field>
             </div>
 
@@ -323,7 +413,7 @@ export default function AdminDashboard() {
                       {crop && (
                         <button
                           type="button"
-                          onClick={() => setForm((f) => ({ ...f, imageCrop: undefined }))}
+                          onClick={() => setForm((f) => ({ ...f, imageCrop: null }))}
                           className="block mt-2 text-xs font-poppins text-neutral-medium hover:text-neutral-dark transition-colors"
                         >
                           Reset crop
